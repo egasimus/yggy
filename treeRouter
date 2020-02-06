@@ -15,20 +15,14 @@ module.exports = function buildAPI (dir) {
     if (stats.isFile()) {
       let { dir, base, name, ext } = parse(relPath)
       dir = `/` + dir.split(sep).map(x=>x.replace(/^_(.+)_$/, ':$1')).join('/')
-      if (methodNames.has(name)) {
-        const handler = require(path)
-        if (typeof handler === 'function') {
-          data.push([ name, dir, require(path) ])
-        } else {
-          console.warn(`${relPath} does not export a function`)
-        }
-      }
+      if (methodNames.has(name)) data.push([ name, dir, path ])
     }
   }
   return data
 }
 
-if (require.main === module)
-  console.log(
-    module.exports(
-      require('path').resolve(__dirname, '..', 'api')))
+if (require.main === module) {
+  for (let [method, route, handler] of module.exports(process.argv[2] || __dirname)) {
+    console.log(`${method}\t${route}\t${handler}`)
+  }
+}
