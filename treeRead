@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+
+const add = require('./add')
+
+module.exports = function treeRead (dir) {
+  const data = {}
+  for (let path of require('glob').sync(`${dir}/**/*`)) {
+    const relPath = require('path').relative(dir, path)
+    const stats = require('fs').statSync(path)
+    //console.log(relPath, stats.isDirectory(), stats.isFile())
+    if (stats.isDirectory()) {
+      add(data, relPath.split('/'), {})
+    }
+    if (stats.isFile()) {
+      add(data, relPath.split('/'), require('fs').readFileSync(path, 'utf8'))
+    }
+  }
+  return data
+}
+
+if (require.main === module) {
+  console.log(
+    JSON.stringify(
+      module.exports(require('path').resolve(__dirname, '../data/boards'))))
+}
+

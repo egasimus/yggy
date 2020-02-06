@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+
+const {resolve, dirname} = require('path')
+const {diff} = require('diff-json')
+const rimraf = require('rimraf').sync
+const mkdirp = require('mkdirp').sync
+const write  = require('fs').writeFileSync
+
+module.exports = function treeUpdate (dir, nextState) {
+
+  let currentState = require('./treeRead')(dir)
+  currentState = require('./flat')(currentState)
+  nextState = require('./flat')(nextState)
+
+  const changes = diff(currentState, nextState)
+  for (let { type, key, value } of changes) {
+
+    console.log([type,key,value])
+
+    const destination = resolve(dir, key)
+
+    if (type === 'remove') {
+      try {
+        rimraf(destination)
+      } catch (e) {
+        if (e.message.includes('ENOTDIR')) {
+          console.warn(`${destination}: not a directory`)
+        }
+      }
+    } else {
+
+      try {
+        mkdirp(dirname(destination))
+      } catch (e) {
+        if (e.message.includes('EEXIST')) {
+          rimraf(dirname(destination))
+          mkdirp(dirname(destination))
+        } else {
+          throw e
+        }
+      }
+
+      const save = () => {
+        if (typeof value === 'object') {
+          mkdirp(destination)
+          //write(destination, JSON.stringify(value), 'utf8')
+        } else {
+          write(destination, value, 'utf8')
+        }
+      }
+
+      try {
+        save()
+      } catch (e) {
+        if (e.message.includes('EISDIR') || e.message.includes('EEXIST')) {
+          rimraf(destination)
+          save()
+        } else {
+          throw e
+        }
+      }
+
+    }
+  }
+}

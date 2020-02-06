@@ -1,0 +1,15 @@
+#!/usr/bin/env node
+const { cwd } = require('process')
+const { sep, resolve, dirname } = require('path')
+const { writeFileSync } = require('fs')
+
+module.exports = function treeWrite (dir = cwd(), data = {}) {
+  const flatData = require('./flat')(data)
+  for (let path in flatData) {
+    const destination = resolve(dir, path)
+    console.log(`mkdir -p ${dirname(destination).yellow}`.blue)
+    require('mkdirp').manualSync(dirname(destination))
+    console.log(`writing ${destination.yellow}`.blue)
+    writeFileSync(destination, flatData[path], 'utf8')
+  }
+}

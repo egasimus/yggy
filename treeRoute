@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+
+const {sync:glob} = require('glob')
+const {relative, parse, sep, resolve} = require('path')
+const {statSync} = require('fs')
+
+const methodNames = new Set([ 'GET', 'POST' ])
+
+module.exports = function buildAPI (dir) {
+  const data = []
+  const pattern = `${dir}/**/*`
+  for (let path of glob(pattern)) {
+    const relPath = relative(dir, path)
+    const stats   = statSync(path)
+    if (stats.isFile()) {
+      let { dir, base, name, ext } = parse(relPath)
+      dir = `/` + dir.split(sep).map(x=>x.replace(/^_(.+)_$/, ':$1')).join('/')
+      if (methodNames.has(name)) {
+        const handler = require(path)
+        if (typeof handler === 'function') {
+          data.push([ name, dir, require(path) ])
+        } else {
+          console.warn(`${relPath} does not export a function`)
+        }
+      }
+    }
+  }
+  return data
+}
+
+if (require.main === module)
+  console.log(
+    module.exports(
+      require('path').resolve(__dirname, '..', 'api')))

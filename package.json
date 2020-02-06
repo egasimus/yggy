@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "diff-json": "^2.0.0",
+    "flat": "^5.0.0",
+    "mkdirp": "^1.0.3",
+    "rimraf": "^3.0.1"
+  }
+}
