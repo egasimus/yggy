@@ -1,4 +1,4 @@
-let debug = true//false
+let debug = false
 
 module.exports = function yggyDebug (...args) {
   if (debug) console.debug(...args)

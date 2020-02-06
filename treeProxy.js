@@ -1,36 +1,37 @@
-const debug = require('./debug')
+const debug                    = require('./debug')
 const {resolve, relative, sep} = require('path')
-const rimraf = require('rimraf').sync
+const rimraf                   = require('rimraf').sync
+const {readFileSync}           = require('fs')
 
 module.exports = function yggyTreeProxy (
   root,
-  opts: {
-    nest    = false,
+  {
+    flat    = false,
+    empty   = false,
     watch   = true,
-    maxSize = 128 * 1024
-  }
+    maxSize = 128 * 1024,
+    cache   = {}
+  } = {}
 ) {
 
   const rel = (...args) => relative(root, ...args)
   const abs = (...args) => resolve(root, ...args)
 
-  const watcher = watch &&
-    require('chokidar').watch(root).on('all', update)
-
-  let cache
-  refresh()
+  if (!empty) refresh()
+  const watcher = watch && require('chokidar').watch(root).on('all', update)
 
   const handler = {
-    has (key) {
+    has (_, key) {
       return Object.keys(cache).includes(key)
     },
-    get (key, val) {
+    get (_, key) {
+      debug(`get`, key)
       return cache[key]
     },
-    set (key, val) {
+    set (_, key, val) {
       cache[key] = val
     },
-    deleteProperty (key) {
+    deleteProperty (_, key) {
       const path = abs(key)
       debug(`deleting`, path)
       rimraf(path)
@@ -42,7 +43,7 @@ module.exports = function yggyTreeProxy (
 
   return {
     tree: new Proxy(cache, handler),
-		watcher,
+    watcher,
     refresh,
     destroy
   }
@@ -58,46 +59,48 @@ module.exports = function yggyTreeProxy (
   }
 
   function update (event, path) {
-    path = rel(path)
     debug(event, path)
-    switch (event) {
-      case 'add':
-      case 'change':
-				setFile(path)
-				break
-      case 'addDir':
-				setDir(path)
-        break
-      case 'unlink':
-      case 'unlinkDir':
-				unset(path)
-        break
+    if (event === 'add' || event === 'change') {
+      setFile(path)
+    } else if (event === 'addDir') {
+      setDir(path)
+    } else {
+      unset(path)
     }
   }
 
-	function setFile (path) {
-		if (nest) {
-			throw new Error('not implemented')
-		} else {
-			cache[path] = readFileSync(path, 'utf8')
-		}
-		break
-	}
+  function setFile (path) {
+    if (flat) {
+      throw new Error('not implemented')
+    } else {
+      let current = cache
+      const data = readFileSync(path, 'utf8')
+      const fragments = rel(path).split(sep)
+      while (fragments.length > 1) {
+        const fragment = fragments.shift()
+        if (!current[fragment]) {
+          current[fragment] = yggyTreeProxy(null, { empty: true, watch: false })
+        }
+        current = current[fragment]
+      }
+      current[fragments[0]] = data
+    }
+  }
 
-	function setDir (path) {
-		if (nest) {
-			throw new Error('not implemented')
-		} else {
-			cache[path] = {}
-		}
-	}
+  function setDir (path) {
+    if (flat) {
+      throw new Error('not implemented')
+    } else {
+      cache[rel(path)] = {}
+    }
+  }
 
-	function unset (path) {
-		if (nest) {
-			throw new Error('not implemented')
-		} else {
-			delete cache[path]
-		}
-	}
+  function unset (path) {
+    if (flat) {
+      throw new Error('not implemented')
+    } else {
+      delete cache[rel(path)]
+    }
+  }
 
 }
