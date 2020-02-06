@@ -2,7 +2,7 @@
 
 const add = require('./add')
 
-module.exports = function treeRead (dir) {
+module.exports = function yggyTreeRead (dir) {
   const data = {}
   for (let path of require('glob').sync(`${dir}/**/*`)) {
     const relPath = require('path').relative(dir, path)
