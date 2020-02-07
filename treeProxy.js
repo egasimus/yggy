@@ -30,14 +30,10 @@ module.exports = function yggyTreeProxy (
     },
     get (_, key) {
       debug(`get`, key)
-      if (Object(cache[key]).hasOwnProperty(YggyDirFlag)) {
-        return cache[key].tree
-      } else {
-        return cache[key]
-      }
+      return cache[key]
     },
     set (_, key, val) {
-      debig(`set`, key)
+      debug(`set`, key)
       cache[key] = val
     },
     deleteProperty (_, key) {
@@ -78,26 +74,27 @@ module.exports = function yggyTreeProxy (
     }
   }
 
-	function add (cache, fragments, data) {
-		let current = cache
-		for (let index in fragments) {
-			const key = fragments[index]
-			if (index < fragments.length - 1) {
-				if (current[key] === undefined) {
-					current[key] = yggyTreeProxy(null, { empty: true, watch: false })
-				}
-				current = current[key]
-			} else {
-				current[key] = data
-			}
-		}
-	}
+  function add (cache, fragments, data) {
+    let current = cache
+    for (let index in fragments) {
+      const key = fragments[index]
+      if (index < fragments.length - 1) {
+        if (current[key] === undefined) {
+          const subtree = yggyTreeProxy(null, { empty: true, watch: false })
+          current[key] = subtree.tree
+        }
+        current = current[key]
+      } else {
+        current[key] = data
+      }
+    }
+  }
 
   function setFile (path) {
     if (flat) {
       throw new Error('not implemented')
     } else {
-			add(cache, rel(path).split(sep), readFileSync(path, 'utf8'))
+      add(cache, rel(path).split(sep), readFileSync(path, 'utf8'))
     }
   }
 
@@ -105,7 +102,8 @@ module.exports = function yggyTreeProxy (
     if (flat) {
       throw new Error('not implemented')
     } else {
-			add(cache, rel(path).split(sep), yggyTreeProxy(null, { empty: true, watch: false }))
+      const subtree = yggyTreeProxy(null, { empty: true, watch: false })
+      add(cache, rel(path).split(sep), subtree.tree)
     }
   }
 
@@ -113,7 +111,7 @@ module.exports = function yggyTreeProxy (
     if (flat) {
       throw new Error('not implemented')
     } else {
-			console.warn(`TODO unset ${path}`)
+      console.warn(`TODO unset ${path}`)
       delete cache[rel(path)]
     }
   }
