@@ -3,6 +3,8 @@ const {resolve, relative, sep} = require('path')
 const rimraf                   = require('rimraf').sync
 const {readFileSync}           = require('fs')
 
+const YggyDirFlag = Symbol('YggyDirFlag')
+
 module.exports = function yggyTreeProxy (
   root,
   {
@@ -13,6 +15,8 @@ module.exports = function yggyTreeProxy (
     cache   = {}
   } = {}
 ) {
+
+  cache[YggyDirFlag] = true
 
   const rel = (...args) => relative(root, ...args)
   const abs = (...args) => resolve(root, ...args)
@@ -26,9 +30,14 @@ module.exports = function yggyTreeProxy (
     },
     get (_, key) {
       debug(`get`, key)
-      return cache[key]
+      if (Object(cache[key]).hasOwnProperty(YggyDirFlag)) {
+        return cache[key].tree
+      } else {
+        return cache[key]
+      }
     },
     set (_, key, val) {
+      debig(`set`, key)
       cache[key] = val
     },
     deleteProperty (_, key) {
@@ -59,7 +68,7 @@ module.exports = function yggyTreeProxy (
   }
 
   function update (event, path) {
-    debug(event, path)
+    console.log(event, path)
     if (event === 'add' || event === 'change') {
       setFile(path)
     } else if (event === 'addDir') {
@@ -69,21 +78,26 @@ module.exports = function yggyTreeProxy (
     }
   }
 
+	function add (cache, fragments, data) {
+		let current = cache
+		for (let index in fragments) {
+			const key = fragments[index]
+			if (index < fragments.length - 1) {
+				if (current[key] === undefined) {
+					current[key] = yggyTreeProxy(null, { empty: true, watch: false })
+				}
+				current = current[key]
+			} else {
+				current[key] = data
+			}
+		}
+	}
+
   function setFile (path) {
     if (flat) {
       throw new Error('not implemented')
     } else {
-      let current = cache
-      const data = readFileSync(path, 'utf8')
-      const fragments = rel(path).split(sep)
-      while (fragments.length > 1) {
-        const fragment = fragments.shift()
-        if (!current[fragment]) {
-          current[fragment] = yggyTreeProxy(null, { empty: true, watch: false })
-        }
-        current = current[fragment]
-      }
-      current[fragments[0]] = data
+			add(cache, rel(path).split(sep), readFileSync(path, 'utf8'))
     }
   }
 
@@ -91,7 +105,7 @@ module.exports = function yggyTreeProxy (
     if (flat) {
       throw new Error('not implemented')
     } else {
-      cache[rel(path)] = {}
+			add(cache, rel(path).split(sep), yggyTreeProxy(null, { empty: true, watch: false }))
     }
   }
 
@@ -99,6 +113,7 @@ module.exports = function yggyTreeProxy (
     if (flat) {
       throw new Error('not implemented')
     } else {
+			console.warn(`TODO unset ${path}`)
       delete cache[rel(path)]
     }
   }
