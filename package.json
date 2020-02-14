@@ -1,4 +1,6 @@
 {
+  "name": "yggy",
+  "version": "0.0.0",
   "dependencies": {
     "chokidar": "^3.3.1",
     "diff-json": "^2.0.0",
