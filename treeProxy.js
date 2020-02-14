@@ -57,9 +57,12 @@ function YggyTreeProxy (
     watch    = true,
 
     // log: (String, Object) -> ()
-    // by default, prints every operation
-    debug    = (event, data={}) =>
-      console.debug(JSON.stringify({ event, ...data }))
+    // by default, prints every operation except Get
+    debug    = (event, data={}) => {
+      if (event!==events.Get) {
+        console.debug(JSON.stringify({ event, ...data }))
+      }
+    }
 
   } = options
 

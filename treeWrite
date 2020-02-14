@@ -10,6 +10,7 @@ module.exports = function treeWrite (dir = cwd(), data = {}) {
     console.log(`mkdir -p ${dirname(destination).yellow}`.blue)
     require('mkdirp').manualSync(dirname(destination))
     console.log(`writing ${destination.yellow}`.blue)
+    console.log({ event: 'Write', destination })
     writeFileSync(destination, flatData[path], 'utf8')
   }
 }

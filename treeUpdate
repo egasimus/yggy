@@ -45,6 +45,7 @@ module.exports = function treeUpdate (dir, nextState) {
           mkdirp(destination)
           //write(destination, JSON.stringify(value), 'utf8')
         } else {
+          console.log({ event: 'Write', destination })
           write(destination, value, 'utf8')
         }
       }
