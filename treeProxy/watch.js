@@ -2,7 +2,7 @@ const {relative, sep} = require('path')
 const {readFileSync}  = require('fs')
 
 module.exports = function makeWatcher ({
-  log,
+  emit,
   root,
   contents,
   flat
@@ -13,7 +13,7 @@ module.exports = function makeWatcher ({
   const watcher = require('chokidar')
     .watch(root, { persistent: false })
     .on('all', function watcherUpdate (event, path) {
-      log(`Yggy.Watch.${event}`, {path})
+      emit(`Yggy.Watch.${event}`, {path})
       if (event === 'add' || event === 'change') {
         setFileNode(path)
       } else if (event === 'addDir') {

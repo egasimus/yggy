@@ -1,4 +1,4 @@
-module.exports = function parseOptions (options) {
+module.exports = function parseOptions (options = {}) {
 
   const {
     // contents: Object
@@ -30,7 +30,7 @@ module.exports = function parseOptions (options) {
     // by default, prints every operation except Get
     log      = (event, data={}) => {
       if (event!==require('./events').Get) {
-        console.log(JSON.stringify({ event, ...data }))
+        console.log({ event, ...data })
       }
     }
   } = options

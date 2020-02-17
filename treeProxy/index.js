@@ -1,49 +1,51 @@
 const {resolve} = require('path')
+const EventEmitter = require('events')
 
 module.exports = YggyTreeProxy
 
-function YggyTreeProxy (
-  root,
-  options = {}
-) {
+function YggyTreeProxy (root, options={}) {
 
-  const events =
-    require('./events')
+  const self = {
+    events: require('./events'),
 
-  const { contents, patterns, flat, empty, watch, log } =
-    require('./options')(options)
+    root,
+    initialOptions: options,
+    options: require('./options')(options),
+    get log () { return self.options.log },
 
-  contents[require('./symbols').YggyIsDir] =
-    true
+    destroy: () => Promise.resolve(self.watcher && self.watcher.close()),
 
-  if (!empty)
-    read()
+    subscribers: [],
+    subscribe:   s => self.subscribers.push(s),
+    unsubscribe: s => self.subscribers = self.subscribers.filter(x=>x!==s),
+    emit: (event, data = {}) => {
+      event = { event, ...data }
+      self.subscribers.forEach(s=>s.next(event))
+    },
 
-  const watcher =
-    watch
-    ? require('./watch')({ log, root, contents, flat })
-    : undefined
+    refresh: (/* TODO refresh subtree */) => {
+      const path = self.root
+      self.emit(self.events.Refreshing, {path})
+      for (let key in self.contents) delete contents[key]
+      Object.assign(self.contents, require('../treeRead')(path))
+      self.emit(self.events.Refreshed, {path})
+    },
 
-  const tree =
-    require('./proxy')({ log, root, contents })
+    read:     () => {},
+    write:    () => {},
+    unlink:   () => {},
+    expand:   () => {},
+    collapse: () => {},
 
-  return {
-    tree,
-    watcher,
-    read,
-    destroy,
   }
 
-  function read () {
-    log(events.Reading, {root})
-    for (let key in contents) delete contents[key]
-    Object.assign(contents, require('../treeRead')(root))
-    log(events.Read, {root})
-  }
+  self.initialOptions = options
+  self.contents = self.options.contents
+  self.contents[require('./symbols').YggyIsDir] = true
+  if (!self.options.empty) self.refresh()
+  if (self.options.watch) self.watcher = require('./watch')(self)
+  self.tree = require('./proxy')(self)
 
-  function destroy () {
-    return Promise.resolve(watch && watcher.close())
-  }
+  return self
 
 }
-
