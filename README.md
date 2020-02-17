@@ -1,6 +1,6 @@
 # Yggy 🌍🌳🌎
 
-## The missing link between Node and Unix 🤯
+## A missing link between Node and Unix 🤯
 
 ```sh
 npm i yggy
@@ -22,7 +22,13 @@ $('/etc/hosts').write($('/etc/hosts').read()+'\nfacebook.com 127.0.0.1')
 
 ### Full path API
 
+### Subscription API
+
+### Mirror API
+
 ## Rationale
+
+Tired of Node's cumbersome FS API?
 
 Yggy is a bidirectional adapter that establishes a mapping
 between an in-memory JavaScript object and the contents of

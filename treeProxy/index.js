@@ -15,7 +15,7 @@ function YggyTreeProxy (root, options={}) {
     root,
     initialOptions: options,
     options: require('./options')(options),
-    destroy: () => Promise.resolve(self.watcher && self.watcher.close()),
+    destroy: () => Promise.resolve()
   })
   trait(subscriptionTrait(self))
   trait(contentTrait(self))
@@ -63,36 +63,37 @@ function contentTrait (self) {
     contents,
     '/': new Proxy(contents, {
       has (_, key) {
-        return Object.keys(contents).includes(key)
+        return Object.keys(self.contents).includes(key)
       },
       get (_, key) {
-        emit(events.Get, {key})
-        return contents[key]
+        self.emit(self.events.Get, {key})
+        return self.contents[key]
       },
       set (_, key, val) {
-        emit(events.Set, {key})
-        contents[key] = val
+        self.emit(self.events.Set, {key})
+        self.contents[key] = val
       },
       deleteProperty (_, key) {
-        const path = resolve(root, key)
-        emit(events.Deleting, {path})
+        const path = resolve(self.root, key)
+        self.emit(self.events.Deleting, {path})
         require('rimraf').sync(path)
-        emit(events.Deleted, {path})
+        self.emit(self.events.Deleted, {path})
       },
       ownKeys () {
-        return Object.keys(contents)
+        return Object.keys(self.contents)
       }
     })
   }
 }
 
 function fsWatcherTrait (self) {
-  emit(`Yggy.Watching`, { root })
-  const { setFileNode, setDirNode, unsetNode } = 
-    getNestedHandlers(contents, root)
+  self.emit(`Yggy.Watching`, { root })
+
+  const branchOptions = { empty: true, watch: false }
+
   return {
-    watch: require('chokidar')
-      .watch(root, { persistent: false })
+    watcher: require('chokidar')
+      .watch(self.root, { persistent: false })
       .on('all', function watcherUpdate (event, path) {
         emit(`Yggy.Watch.${event}`, {path})
         if (event === 'add' || event === 'change') {
@@ -102,13 +103,9 @@ function fsWatcherTrait (self) {
         } else {
           unsetNode(path)
         }
-      })
+      }),
+    destroy: () => self.destroy().then(()=>self.watcher.close())
   }
-}
-
-function getNestedHandlers (contents, root) {
-
-  const branchOptions = { empty: true, watch: false }
 
   return { setFileNode, setDirNode, unsetNode }
 
