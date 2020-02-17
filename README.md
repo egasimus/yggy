@@ -1,5 +1,29 @@
 # Yggy 🌍🌳🌎
 
+## The missing link between Node and Unix 🤯
+
+```sh
+npm i yggy
+node -r yggy
+```
+
+```js
+$ = require('yggy')('/')
+$['/'].etc.hosts += '\nfacebook.com 127.0.0.1'
+$['/']['etc']['hosts'] += '\nfacebook.com 127.0.0.1'
+$('/etc/hosts').write($('/etc/hosts').read()+'\nfacebook.com 127.0.0.1')
+```
+
+## API
+
+### Initialization
+
+### Fragment API
+
+### Full path API
+
+## Rationale
+
 Yggy is a bidirectional adapter that establishes a mapping
 between an in-memory JavaScript object and the contents of
 a directory tree on the filesystem -- because both are,
@@ -10,14 +34,10 @@ manipulate coarse program state without special tooling.
 This makes it the ideal datastore when developing scripts,
 batch jobs, and one-off microfrontends.
 
-## Usage
-
-### treeRead, treeWrite, treeUpdate
-
-### treeProxy
-
-#### Nested mode
-
-#### Unnested mode
-
-### treeRoute
+Another way to view Yggy is as an impedance matcher for
+interactive exploratory programming: it lets you incrementally
+establish the data model of a problem. You can make quick
+and dirty modifications to your schema and data with the
+usual Unix toolset and have them immediately represented
+within the address space of the custom, problem-specific
+interface that you're building for your data.
