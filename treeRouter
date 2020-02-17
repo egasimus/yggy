@@ -6,7 +6,7 @@ const {statSync} = require('fs')
 
 const methodNames = new Set([ 'GET', 'POST' ])
 
-module.exports = function buildAPI (dir) {
+module.exports = function buildRouteMap (dir) {
   const data = []
   const pattern = `${dir}/**/*`
   for (let path of glob(pattern)) {
