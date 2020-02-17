@@ -9,7 +9,9 @@ node -r yggy
 
 ```js
 $ = require('yggy')('/')
+// the following calls are equivalent
 $['/'].etc.hosts += '\nfacebook.com 127.0.0.1'
+$['/etc/hosts'] += '\nfacebook.com 127.0.0.1'
 $['/']['etc']['hosts'] += '\nfacebook.com 127.0.0.1'
 $('/etc/hosts').write($('/etc/hosts').read()+'\nfacebook.com 127.0.0.1')
 ```
@@ -25,6 +27,10 @@ $('/etc/hosts').write($('/etc/hosts').read()+'\nfacebook.com 127.0.0.1')
 ### Subscription API
 
 ### Mirror API
+
+### Expand/collapse
+
+### Hooks
 
 ## Rationale
 

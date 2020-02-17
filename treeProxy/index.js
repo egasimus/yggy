@@ -27,7 +27,6 @@ function YggyRoot (root, options={}) {
   })
 
   trait(require('./traits/syncFsBackend')(self))
-  trait(require('./traits/fragmentApi')(self))
   trait(require('./traits/subscription')(self))
 
   //trait(contentTrait(self))
