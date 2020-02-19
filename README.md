@@ -11,8 +11,8 @@ node -r yggy
 // remember our old friend, the single-character identifier from jQuery?
 $ = require('yggy')('/')
 // the following calls are equivalent
-$['/'].etc.hosts += '\nfacebook.com 127.0.0.1'
 $['/etc/hosts'] += '\nfacebook.com 127.0.0.1'
+$['/'].etc.hosts += '\nfacebook.com 127.0.0.1'
 $['/']['etc']['hosts'] += '\nfacebook.com 127.0.0.1'
 $('/etc/hosts').write($('/etc/hosts').read()+'\nfacebook.com 127.0.0.1')
 ```

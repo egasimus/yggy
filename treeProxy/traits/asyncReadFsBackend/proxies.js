@@ -5,21 +5,23 @@ module.exports = {
 
 function DirectoryProxy (path) {
 
-  const {resolve, dirname} = require('path')
+  const {resolve} = require('path')
 
   const {
-    statSync,
-    readFileSync,
-    writeFileSync,
-    unlinkSync,
-    readdirSync
+    stat,
+    readFile,
+    writeFile,
+    unlink,
+    readdir
   } = require('fs')
 
   return new Proxy({}, {
 
     has (_, k) {
       try {
-        statSync(resolve(path, k))
+        await new Promise((resolve, reject)=>
+          statSync(resolve(path, k), err=>err?reject(err):resolve(true))
+        )
         return true
       } catch (e) {
         if (e.code === 'ENOENT') return false
@@ -30,15 +32,19 @@ function DirectoryProxy (path) {
     get (_, k) {
       if (typeof k === 'string') {
         k = resolve(path, k)
-        let stat
+        let stats
         try {
-          stat = statSync(k)
+          stats = await new Promise((resolve, reject)=>
+            stat(k, (error, stats)=>error?reject(error):resolve(stats))
+          )
         } catch (e) {
           if (e.code === 'ENOENT') return undefined
           throw e
         }
         if (stat.isFile()) {
-          return readFileSync(k, 'utf8')
+          return new Promise((resolve, reject)=>
+            readFile(k, 'utf8', (error, data)=>error?reject(error):resolve(data))
+          )
         } else if (stat.isDirectory()) {
           return DirectoryProxy(k)
         }
@@ -48,8 +54,6 @@ function DirectoryProxy (path) {
     },
 
     set (_, k, v) {
-      //console.debug(`set`, path, k)
-      require('mkdirp').sync(dirname(resolve(path, k)))
       writeFileSync(resolve(path, k), v)
       return v
     },

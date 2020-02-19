@@ -1,6 +1,10 @@
 module.exports = function parseOptions (options = {}) {
 
   const {
+
+    // backend: String
+    backend = 'sync',
+
     // contents: Object
     // initial tree contents can be provided via this option
     contents = {},
@@ -33,8 +37,17 @@ module.exports = function parseOptions (options = {}) {
         console.log({ event, ...data })
       }
     }
+
   } = options
 
-  return { contents, patterns, flat, empty, watch, log }
+  return {
+    backend,
+    contents,
+    patterns,
+    flat,
+    empty,
+    watch,
+    log
+  }
 
 }

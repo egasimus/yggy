@@ -26,12 +26,19 @@ function YggyRoot (root, options={}) {
     called: () => require('./errors').CALLED_NOT_IMPLEMENTED()
   })
 
-  trait(require('./traits/syncFsBackend')(self))
-  trait(require('./traits/subscription')(self))
+  switch (self.options.backend) {
+    case 'webCrawling':
+      trait(require('./traits/webCrawlingBackend')(self));
+      break
+    case 'asyncRead':
+      trait(require('./traits/asyncReadFsbackend')(self))
+      break
+    default:
+      trait(require('./traits/syncFsBackend')(self))
+      break
+  }
 
-  //trait(contentTrait(self))
-  //trait(fsTrait(self))
-  //trait(fsWatcherTrait(self))
+  trait(require('./traits/subscription')(self))
 
   return self
 }
