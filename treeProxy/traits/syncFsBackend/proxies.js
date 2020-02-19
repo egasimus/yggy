@@ -38,7 +38,7 @@ function DirectoryProxy (path) {
           throw e
         }
         if (stat.isFile()) {
-          return readFileSync(k)
+          return readFileSync(k, 'utf8')
         } else if (stat.isDirectory()) {
           return DirectoryProxy(k)
         }
