@@ -1,11 +1,10 @@
-module.exports = function subscriptionTrait (self) {
-  return {
-    subscribers: [],
-    subscribe:   s => self.subscribers.push(s),
-    unsubscribe: s => self.subscribers = self.subscribers.filter(x=>x!==s),
-    emit: (event, data = {}) => {
-      event = { event, ...data }
-      self.subscribers.forEach(s=>s.next(event))
-    },
+module.exports = self => {
+  self.subscribers = []
+  self.subscribe   = s => self.subscribers.push(s)
+  self.unsubscribe = s => self.subscribers = self.subscribers.filter(x=>x!==s)
+  self.emit = funciton emit (event, data = {}) {
+    event = { event, ...data }
+    self.subscribers.forEach(s=>s.next(event))
   }
+  return self
 }
