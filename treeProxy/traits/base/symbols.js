@@ -1,4 +1,7 @@
 // symbol marks the contents
 module.exports = {
-  YggyIsDir: Symbol('Yggy.IsDir')
+  File:      Symbol('Yggy.File'),
+  Directory: Symbol('Yggy.Directory'),
+  Symlink:   Symbol('Yggy.Symlink'),
+  Hardlink:  Symbol('Yggy.Hardlink')
 }

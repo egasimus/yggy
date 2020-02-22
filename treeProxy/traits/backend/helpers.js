@@ -9,7 +9,11 @@ function descend (x, ...fragments) {
   return x
 }
 
-function fsTrait (self, getHandles, getProxies) {
+function fsTrait (
+  self,
+  getHandles,
+  getProxies
+) {
   const {sep} = require('path')
   const {statSync} = require('fs')
 
@@ -23,18 +27,36 @@ function fsTrait (self, getHandles, getProxies) {
     NOT_IMPLEMENTED
   } = require('../../errors')
 
-  // $('/') syntax returns node handles
-  // TODO handle dir replaced with file
-  self.called = path =>
-    isFile ? path ? NOT_A_DIR(self.root)
-                  : getHandles().file(self.root) :
-    isDir  ? getHandles().dir(path||self.root)
-           : NOT_A_FILE_OR_DIR(self.root)
+  // the $('/') syntax returns node handles
+  self.called = (...path) => {
 
-  // $['/'] syntax returns just the node values
+    // when file:
+    if (isFile) {
+      // $() -> handle(self)
+      // $(anything else) -> error 
+      // TODO if parseable file descend into file
+      if (path.length > 0) throw new Error(NOT_A_DIR)
+      return getHandles().file(self.root)
+    }
+
+    // when directory:
+    if (isDir) {
+      // $() -> handle(self)
+      // $('foo'), $('foo/bar'), $('foo', 'bar') -> descend
+      if (path.length === 0) path = [self.root]
+      return getHandles().dir(path.join(sep))
+    }
+
+    // other node types not supported yet
+    NOT_A_FILE_OR_DIR(self.root)
+
+  }
+
+  // the $['/'] syntax returns just the node contents
   self = new Proxy(self, {
 
     get (self, k) {
+      if (!k.startsWith) return self[k]
 
       if      (k.startsWith('../')) NOT_IMPLEMENTED('tree ascension') // TODO
       else if (k.startsWith('./'))  NOT_IMPLEMENTED('current dir')    // TODO

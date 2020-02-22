@@ -5,6 +5,7 @@ module.exports = {
 
 function DirectoryHandle (path) {
   return {
+    type: require('../../base/symbols').Directory,
     get path () { return path },
 
     exists () {},
@@ -20,7 +21,9 @@ function DirectoryHandle (path) {
 
 function FileHandle (path) {
   return {
+    type: require('../../base/symbols').File,
     get path () { return path },
+
     exists () {},
     stat   () {},
     remove () {},
@@ -29,5 +32,9 @@ function FileHandle (path) {
     write  () {},
     append () {},
     watch  () {},
+
+    linkAt (...fragments) {
+      console.log('linkAt', this.path, fragments)
+    }
   }
 }

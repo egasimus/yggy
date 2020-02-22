@@ -1,4 +1,4 @@
-
+// trait junkyard
 
 function fsTrait (self) {
   return {
@@ -21,7 +21,7 @@ function fsTrait (self) {
 function contentTrait (self) {
   const contents = Object.assign(
     self.options.contents,
-    { [self.symbols.YggyIsDir]: true }
+    { [self.symbols.IsDir]: true }
   )
   return {
     contents,
