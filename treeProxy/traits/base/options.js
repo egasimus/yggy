@@ -3,7 +3,7 @@ module.exports = function parseOptions (options = {}) {
   const {
 
     // backend: String
-    backend = 'syncFs',
+    backend = 'fsSync',
 
     // contents: Object
     // initial tree contents can be provided via this option

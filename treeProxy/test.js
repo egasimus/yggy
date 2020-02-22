@@ -14,7 +14,8 @@ function validate () {
     "$('/test.tmp')",
     "$['/']['test.tmp']",
   ].forEach(code=>{
-    console.log(code, eval(code))
+    console.log()
+    console.log(code, '===', eval(code))
   })
 }
 
