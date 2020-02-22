@@ -3,38 +3,44 @@ module.exports = {
   file: FileHandle
 }
 
-function DirectoryHandle (path) {
+function BaseHandle (root, path) {
   return {
+    get path () {
+      return path
+    },
+    exists () {
+    },
+    stat () {
+    },
+    remove () {
+    },
+    linkAt (...fragments) {
+      const {sep, join, dirname} = require('path')
+      const {symlinkSync} = require('fs')
+      const target   = join(root, path.join(sep).replace(/\/+/, '/'))
+      const linkPath = join(root, fragments.join(sep))
+      require('mkdirp').sync(dirname(linkPath))
+      symlinkSync(target, linkPath)
+    }
+  }
+}
+
+function DirectoryHandle (root, path) {
+  return Object.assign(BaseHandle(root, path), {
     type: require('../../base/symbols').Directory,
-    get path () { return path },
-
-    exists () {},
-    stat   () {},
-    remove () {},
-
     read   () {},
     file   () {},
     mkdir  () {},
     watch  () {}
-  }
+  })
 }
 
-function FileHandle (path) {
-  return {
+function FileHandle (root, path) {
+  return Object.assign(BaseHandle(root, path), {
     type: require('../../base/symbols').File,
-    get path () { return path },
-
-    exists () {},
-    stat   () {},
-    remove () {},
-
     read   () {},
     write  () {},
     append () {},
     watch  () {},
-
-    linkAt (...fragments) {
-      console.log('linkAt', this.path, fragments)
-    }
-  }
+  })
 }

@@ -18,8 +18,8 @@ function fsTrait (
   const {statSync} = require('fs')
 
   const stat   = statSync(self.root)
-  const isFile = stat.isFile()
-  const isDir  = stat.isDirectory()
+  const amFile = stat.isFile()
+  const amDir  = stat.isDirectory()
 
   const {
     NOT_A_DIR,
@@ -28,29 +28,9 @@ function fsTrait (
   } = require('../../errors')
 
   // the $('/') syntax returns node handles
-  self.called = (...path) => {
-
-    // when file:
-    if (isFile) {
-      // $() -> handle(self)
-      // $(anything else) -> error 
-      // TODO if parseable file descend into file
-      if (path.length > 0) throw new Error(NOT_A_DIR)
-      return getHandles().file(self.root)
-    }
-
-    // when directory:
-    if (isDir) {
-      // $() -> handle(self)
-      // $('foo'), $('foo/bar'), $('foo', 'bar') -> descend
-      if (path.length === 0) path = [self.root]
-      return getHandles().dir(path.join(sep))
-    }
-
-    // other node types not supported yet
-    NOT_A_FILE_OR_DIR(self.root)
-
-  }
+  self.called = (...path) =>
+    require('./called')(
+      amFile, amDir, getHandles, self.root, path)
 
   // the $['/'] syntax returns just the node contents
   self = new Proxy(self, {
@@ -62,8 +42,8 @@ function fsTrait (
       else if (k.startsWith('./'))  NOT_IMPLEMENTED('current dir')    // TODO
       else if (!k.startsWith('/'))  return self[k] // all other props left alone
 
-      let here = isFile ? NOT_A_DIR(self.root) :
-                 isDir  ? getProxies().dir(self.root) :
+      let here = amFile ? NOT_A_DIR(self.root) :
+                 amDir  ? getProxies().dir(self.root) :
                  NOT_A_FILE_OR_DIR(self.root)
       if (k.slice(1).length>0) here = descend(here, ...k.slice(1).split(sep))
       return here
