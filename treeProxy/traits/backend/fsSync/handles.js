@@ -26,7 +26,9 @@ function BaseHandle (root, pathFragments) {
       const {join} = require('path')
       return join(root, this.path)
     },
-    exists () {
+    get exists () {
+      const {existsSync} = require('fs')
+      return existsSync(this.fullPath)
     },
     stat () {
       const {statSync} = require('fs')
