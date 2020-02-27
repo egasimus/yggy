@@ -14,6 +14,7 @@ $ = require('yggy')('/')
 $['/etc/hosts'] += '\nfacebook.com 127.0.0.1'
 $['/'].etc.hosts += '\nfacebook.com 127.0.0.1'
 $['/']['etc']['hosts'] += '\nfacebook.com 127.0.0.1'
+$('/etc/hosts').append('\nfacebook.com 127.0.0.1')
 $('/etc/hosts').write($('/etc/hosts').read()+'\nfacebook.com 127.0.0.1')
 ```
 
