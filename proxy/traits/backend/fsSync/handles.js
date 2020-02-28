@@ -89,8 +89,10 @@ function FileHandle (root, pathFragments) {
       get dir  () { return DirectoryHandle(root, pathFragmentsFragments) }
     },
     type: require('../../base/symbols').File,
-    read   () {},
-    write  (data, options) {
+    read (options) {
+      return require('fs').readFileSync(this.fullPath, options)
+    },
+    write (data, options) {
       require('fs').writeFileSync(this.fullPath, data, options)
     },
     append (data, options) {
