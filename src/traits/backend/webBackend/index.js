@@ -6,3 +6,7 @@ module.exports = function webBackendTrait (self) {
 
   return trait
 }
+
+function defGetter (x, y, get) {
+  return Object.defineProperty(x, y, { get, configurable: true })
+}

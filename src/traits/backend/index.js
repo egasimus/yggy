@@ -1,7 +1,7 @@
 module.exports = self => {
   const backends = {
-    fsSync:      require('./fsSync'),
-    fsAsyncRead: require('./fsAsyncRead')
+    fsSync:      require('./fsSyncBackend'),
+    fsAsyncRead: require('./fsAsyncReadBackend')
   }
   const {backend} = self.options
   self = backends[backend](self)

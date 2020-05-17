@@ -1,3 +1,8 @@
+module.exports = Object.assign(
+  YggyRoot,
+  require('./oneshots')
+)
+
 const {resolve, relative, sep} = require('path')
 const {readFileSync} = require('fs')
 const EventEmitter   = require('events')
