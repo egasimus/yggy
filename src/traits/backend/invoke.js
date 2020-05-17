@@ -1,4 +1,4 @@
-module.exports = (amFile, amDir, getHandles, root, path) => {
+module.exports = function invoke (amFile, amDir, getHandles, root, path) {
 
   const {
     NOT_A_DIR,

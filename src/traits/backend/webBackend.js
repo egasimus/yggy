@@ -1,13 +1,51 @@
-const { URL } = require('url')
-
-module.exports = {
+module.exports = Object.assign(webBackendTrait, {
+  WebPageHandle,
   WebCacheProxy,
   WebHostProxy,
-  WebPageProxy
+  WebPageProxy,
+})
+
+function webBackendTrait (self) {
+  const trait = {
+    invoke: url => require('.').WebPageHandle(url)
+  }
+  defGetter(trait, '/', () => require('.').WebCacheProxy)
+  return trait
 }
 
-function getOwnPropertyDescriptor (_) {
-  return { enumerable: true, configurable: true }
+function defGetter (x, y, get) {
+  return Object.defineProperty(x, y, { get, configurable: true })
+}
+
+const { URL } = require('url')
+
+function WebPageHandle (url) {
+  return {
+    get path () {
+      return url
+    },
+    exists   () {
+      // verify the page doesn't return a 404 (OPTIONS request?)
+    },
+    stat     () {
+      // get info about the page (OPTIONS requires again?)
+    },
+    remove   () {
+      // remove this page from the cache
+    },
+    read     () {
+      // get either the raw contents or a processed version
+    },
+    write    () {
+      // make this the only saved version of the page
+    },
+    append   () {
+      // add versioned snapshot
+    },
+    watch    () {
+      // periodically poll page for changes
+    },
+  }
 }
 
 function WebCacheProxy (cache) {
@@ -70,4 +108,8 @@ function WebPageProxy (url) {
     ownKeys (_) { /* crawl page for items of interest? */ },
     getOwnPropertyDescriptor
   })
+}
+
+function getOwnPropertyDescriptor (_) {
+  return { enumerable: true, configurable: true }
 }

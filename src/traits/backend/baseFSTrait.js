@@ -1,15 +1,4 @@
-module.exports = { defGetter, descend, fsTrait }
-
-function defGetter (x, y, get) {
-  return Object.defineProperty(x, y, { get, configurable: true })
-}
-
-function descend (x, ...fragments) {
-  fragments.forEach(y=>x=x[y])
-  return x
-}
-
-function fsTrait (
+module.exports = function baseFSTrait (
   self,
   getHandles,
   getProxies
@@ -28,8 +17,8 @@ function fsTrait (
   } = require('../../errors')
 
   // the $('/') syntax returns node handles
-  self.called = (...path) =>
-    require('./called')(
+  self.invoke = (...path) =>
+    require('./invoke')(
       amFile, amDir, getHandles, self.root, path)
 
   // the $['/'] syntax returns just the node contents
@@ -45,7 +34,8 @@ function fsTrait (
       let here = amFile ? NOT_A_DIR(self.root) :
                  amDir  ? getProxies().dir(self.root) :
                  NOT_A_FILE_OR_DIR(self.root)
-      if (k.slice(1).length>0) here = descend(here, ...k.slice(1).split(sep))
+      if (k.slice(1).length>0)
+        here = require('./descend')(here, ...k.slice(1).split(sep))
       return here
     },
 
